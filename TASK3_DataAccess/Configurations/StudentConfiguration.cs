@@ -18,11 +18,9 @@ namespace TASK3_DataAccess.Configurations {
           .HasMaxLength(100);
 
       builder.Property(s => s.Phone)
-          .IsRequired()
           .HasMaxLength(12);
 
       builder.Property(s => s.Address)
-          .IsRequired()
           .HasMaxLength(200);
 
       builder.Property(s => s.BirthDate)

@@ -1,7 +1,11 @@
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using MicroElements.Swashbuckle.FluentValidation.AspNetCore;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using TASK3_Business.Exceptions;
+using TASK3_Business.Services.Implementations;
+using TASK3_Business.Services.Interfaces;
 using TASK3_Business.Validators.StudentValidators;
 using TASK3_DataAccess;
 
@@ -9,7 +13,13 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
-builder.Services.AddControllers();
+builder.Services.AddControllers().ConfigureApiBehaviorOptions(options => {
+  options.InvalidModelStateResponseFactory = context => {
+    var errors = context.ModelState.Where(x => x.Value.Errors.Count > 0)
+    .Select(x => new RestExceptionError(x.Key, x.Value.Errors.First().ErrorMessage)).ToList();
+    return new BadRequestObjectResult(new { message = "", errors });
+  };
+});
 
 builder.Services.AddDbContext<AppDbContext>(option => {
   option.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
@@ -22,6 +32,10 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddFluentValidationClientsideAdapters();
 builder.Services.AddValidatorsFromAssemblyContaining<StudentCreateOneDtoValidator>();
+
+//Custom Services
+builder.Services.AddScoped<IStudentService, StudentService>();
+builder.Services.AddScoped<IGroupService, GroupService>();
 
 //Microelements
 builder.Services.AddFluentValidationRulesToSwagger();

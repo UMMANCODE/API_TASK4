@@ -1,4 +1,7 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.EntityFrameworkCore;
+using Project.Helpers;
 using TASK3_Business.Dtos.StudentDtos;
 using TASK3_Business.Exceptions;
 using TASK3_Business.Services.Interfaces;
@@ -8,18 +11,15 @@ using TASK3_DataAccess;
 namespace TASK3_Business.Services.Implementations {
   public class StudentService : IStudentService {
     private readonly AppDbContext _context;
+    private readonly IWebHostEnvironment _env;
 
-    public StudentService(AppDbContext context) {
+    public StudentService(AppDbContext context, IWebHostEnvironment env) {
       _context = context;
-
+      _env = env;
     }
     public int Create(StudentCreateOneDto createDto) {
-      Group group = _context.Groups.Include(x => x.Students)
-        .FirstOrDefault(x => x.Id == createDto.GroupId && !x.IsDeleted);
-      if (group == null) {
-        throw new RestException();
-      }
-
+      Group? group = _context.Groups.Include(x => x.Students)
+        .FirstOrDefault(x => x.Id == createDto.GroupId && !x.IsDeleted) ?? throw new RestException();
       if (group.Limit <= group.Students.Count) {
         throw new RestException();
       }
@@ -34,6 +34,10 @@ namespace TASK3_Business.Services.Implementations {
         GroupId = createDto.GroupId
       };
 
+      if (createDto.Photo != null) {
+        student.Image = FileManager.Save(createDto.Photo, _env.WebRootPath, "images");
+      }
+
       _context.Students.Add(student);
       _context.SaveChanges();
 
@@ -41,33 +45,35 @@ namespace TASK3_Business.Services.Implementations {
     }
 
     public void Delete(int id) {
-      var studentToDelete = _context.Students.Find(id);
-      if (studentToDelete == null) {
-        throw new RestException();
-      }
+      var studentToDelete = _context.Students.Find(id) ?? throw new RestException();
+      var group = _context.Groups.FirstOrDefault(c => c.Id == studentToDelete.GroupId && !c.IsDeleted);
 
-      var group = _context.Groups.FirstOrDefault(c => c.Id == studentToDelete.GroupId);
       if (group != null) {
         group.Students.Remove(studentToDelete);
         _context.Groups.Update(group);
       }
-      _context.Students.Remove(studentToDelete);
-      _context.SaveChanges();
 
+      if (studentToDelete.Image != null) {
+        FileManager.Delete(_env.WebRootPath, "images", studentToDelete.Image);
+      }
+
+      studentToDelete.IsDeleted = true;
+      _context.Students.Update(studentToDelete);
     }
 
-    public List<StudentGetAllDto> GetAll() {
+    public List<StudentGetAllDto> GetAll(int pageNumber = 1, int pageSize = 1) {
 
       var data = _context.Students
-
-          .Select(x => new StudentGetAllDto {
-            Id = x.Id,
-            FirstName = x.FirstName,
-            LastName = x.LastName,
-            Email = x.Email,
-            GroupId = x.GroupId
-          })
-          .ToList();
+        .Where(x => !x.IsDeleted)
+        .Skip((pageNumber - 1) * pageSize)
+        .Take(pageSize)
+        .Select(x => new StudentGetAllDto {
+          Id = x.Id,
+          FirstName = x.FirstName,
+          LastName = x.LastName,
+          Email = x.Email,
+          GroupId = x.GroupId
+        }).ToList();
 
       return data;
 
@@ -75,10 +81,7 @@ namespace TASK3_Business.Services.Implementations {
 
     public StudentGetOneDto GetById(int id) {
       var data = _context.Students.Include(s => s.Group)
-                  .FirstOrDefault(s => s.Id == id);
-      if (data == null) {
-        throw new RestException();
-      }
+                  .FirstOrDefault(s => s.Id == id) ?? throw new RestException();
 
       StudentGetOneDto studentDetailsDto = new() {
         FirstName = data.FirstName,
@@ -95,17 +98,10 @@ namespace TASK3_Business.Services.Implementations {
     }
 
     public void Update(int id, StudentUpdateOneDto studentUpdate) {
-      var existingStudent = _context.Students.Find(id);
-      if (existingStudent == null) {
-        throw new RestException();
-      }
+      var existingStudent = _context.Students.Find(id) ?? throw new RestException();
 
-      Group group = _context.Groups.Include(x => x.Students)
-        .FirstOrDefault(x => x.Id == studentUpdate.GroupId && !x.IsDeleted);
-      if (group == null) {
-        throw new RestException();
-      }
-
+      Group? group = _context.Groups.Include(x => x.Students)
+        .FirstOrDefault(x => x.Id == studentUpdate.GroupId && !x.IsDeleted) ?? throw new RestException();
 
       if (group.Limit <= group.Students.Count) {
         throw new RestException();
@@ -118,6 +114,13 @@ namespace TASK3_Business.Services.Implementations {
       existingStudent.Address = studentUpdate.Address;
       existingStudent.BirthDate = studentUpdate.BirthDate;
       existingStudent.GroupId = studentUpdate.GroupId;
+
+      if (studentUpdate.Photo != null) {
+        if (existingStudent.Image != null) {
+          FileManager.Delete(_env.WebRootPath, "images", existingStudent.Image);
+        }
+        existingStudent.Image = FileManager.Save(studentUpdate.Photo, _env.WebRootPath, "images");
+      }
 
       _context.Students.Update(existingStudent);
       _context.SaveChanges();

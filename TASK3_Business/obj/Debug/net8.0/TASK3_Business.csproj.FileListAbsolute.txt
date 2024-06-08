@@ -32,3 +32,4 @@ C:\Users\user\Desktop\Code Academy\API\TASK4\TASK3_Business\bin\Debug\net8.0\TAS
 C:\Users\user\Desktop\Code Academy\API\TASK4\TASK3_Business\bin\Debug\net8.0\TASK3_Core.pdb
 C:\Users\user\Desktop\Code Academy\API\TASK4\TASK3_Business\obj\Debug\net8.0\TASK3_Business.csproj.CopyComplete
 C:\Users\user\Desktop\Code Academy\API\TASK4\TASK3_Business\obj\Debug\net8.0\ref\TASK3_Business.dll
+C:\Users\user\Desktop\Code Academy\API\TASK4\TASK3_Business\obj\Debug\net8.0\TASK3_Business.sourcelink.json

@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using TASK3_Business.Dtos.GroupDtos;
+using TASK3_Business.Services.Interfaces;
 using TASK3_Core.Entities;
 using TASK3_DataAccess;
 
@@ -8,85 +9,41 @@ namespace TASK3_Api.Controllers {
   [ApiController]
   public class GroupsController : Controller {
     private readonly AppDbContext _context;
+    private readonly IGroupService _groupService;
 
-    public GroupsController(AppDbContext context) {
+    public GroupsController(AppDbContext context, IGroupService groupService) {
       _context = context;
+      _groupService = groupService;
     }
 
     [HttpGet("")]
     public ActionResult<List<GroupGetAllDto>> GetAll(int pageNumber = 1, int pageSize = 1) {
-      if (pageNumber <= 0 || pageSize <= 0) {
-        return BadRequest("Page number and page size must be greater than zero!");
-      }
-      var data = _context.Groups
-        .Where(x => !x.IsDeleted)
-        .Skip((pageNumber - 1) * pageSize)
-          .Take(pageSize)
-          .Select(x => new GroupGetAllDto {
-            Id = x.Id,
-            Name = x.Name,
-            Limit = x.Limit
-          }).ToList();
+      var data = _groupService.GetAll(pageNumber, pageSize);
 
       return StatusCode(200, data);
     }
 
     [HttpGet("{id}")]
     public ActionResult<GroupGetOneDto> GetById(int id) {
-      var data = _context.Groups
-        .FirstOrDefault(x => x.Id == id && !x.IsDeleted);
-      if (data == null) {
-        return NotFound();
-      }
-      GroupGetOneDto groupGetOneDto = new() {
-        Id = data.Id,
-        Name = data.Name,
-        Limit = data.Limit
-      };
-
-      return StatusCode(200, groupGetOneDto);
+      var data = _groupService.GetById(id);
+      return StatusCode(200, data);
     }
 
     [HttpPost("")]
     public ActionResult Create(GroupCreateOneDto groupCreateOneDto) {
-      Group group = new() {
-        Name = groupCreateOneDto.Name,
-        Limit = groupCreateOneDto.Limit
-      };
-
-      _context.Groups.Add(group);
-      _context.SaveChanges();
-
-      return StatusCode(201, new { group.Id });
+      int id = _groupService.Create(groupCreateOneDto);
+      return StatusCode(201, new { id });
     }
 
     [HttpPut("{id}")]
-    public ActionResult Update(GroupUpdateOneDto groupUpdateOneDto) {
-      var existingGroup = _context.Groups
-        .FirstOrDefault(x => x.Id == groupUpdateOneDto.Id && !x.IsDeleted);
-      if (existingGroup == null) {
-        return NotFound();
-      }
-      existingGroup.Name = groupUpdateOneDto.Name;
-      existingGroup.Limit = groupUpdateOneDto.Limit;
-
-      _context.Groups.Update(existingGroup);
-      _context.SaveChanges();
-
+    public ActionResult Update(int id, GroupUpdateOneDto groupUpdateOneDto) {
+      _groupService.Update(id, groupUpdateOneDto);
       return StatusCode(204);
     }
 
     [HttpDelete("{id}")]
     public ActionResult Delete(int id) {
-      var existingGroup = _context.Groups
-        .FirstOrDefault(x => x.Id == id && !x.IsDeleted);
-      if (existingGroup == null) {
-        return NotFound();
-      }
-
-      _context.Groups.Remove(existingGroup);
-      _context.SaveChanges();
-
+      _groupService.Delete(id);
       return StatusCode(204);
     }
   }

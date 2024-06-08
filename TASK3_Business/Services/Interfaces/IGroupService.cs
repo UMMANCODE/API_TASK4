@@ -8,7 +8,7 @@ using TASK3_Business.Dtos.GroupDtos;
 namespace TASK3_Business.Services.Interfaces {
   public interface IGroupService {
     int Create(GroupCreateOneDto createDto);
-    List<GroupGetAllDto> GetAll();
+    List<GroupGetAllDto> GetAll(int pageNumber = 1, int pageSize = 1);
     GroupGetOneDto GetById(int id);
     void Update(int id, GroupUpdateOneDto updateDto);
     void Delete(int id);

@@ -32,3 +32,4 @@ C:\Users\user\Desktop\Code Academy\API\TASK4\TASK3_DataAccess\obj\Debug\net8.0\r
 C:\Users\user\Desktop\Code Academy\API\TASK4\TASK3_DataAccess\obj\Debug\net8.0\TASK3_DataAccess.pdb
 C:\Users\user\Desktop\Code Academy\API\TASK4\TASK3_DataAccess\obj\Debug\net8.0\TASK3_DataAccess.genruntimeconfig.cache
 C:\Users\user\Desktop\Code Academy\API\TASK4\TASK3_DataAccess\obj\Debug\net8.0\ref\TASK3_DataAccess.dll
+C:\Users\user\Desktop\Code Academy\API\TASK4\TASK3_DataAccess\obj\Debug\net8.0\TASK3_DataAccess.sourcelink.json

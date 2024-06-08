@@ -292,3 +292,5 @@ C:\Users\user\Desktop\Code Academy\API\TASK4\TASK3_Api\obj\Debug\net8.0\scopedcs
 C:\Users\user\Desktop\Code Academy\API\TASK4\TASK3_Api\obj\Debug\net8.0\TASK3_Api.csproj.CopyComplete
 C:\Users\user\Desktop\Code Academy\API\TASK4\TASK3_Api\obj\Debug\net8.0\TASK3_Api.genruntimeconfig.cache
 C:\Users\user\Desktop\Code Academy\API\TASK4\TASK3_Api\obj\Debug\net8.0\ref\TASK3_Api.dll
+C:\Users\user\Desktop\Code Academy\API\TASK4\TASK3_Api\obj\Debug\net8.0\TASK3_Api.sourcelink.json
+C:\Users\user\Desktop\Code Academy\API\TASK4\TASK3_Api\bin\Debug\net8.0\TASK3_Api.staticwebassets.runtime.json

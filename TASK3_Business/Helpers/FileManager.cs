@@ -1,13 +1,14 @@
 ﻿using Microsoft.AspNetCore.Components.Forms;
+using Microsoft.AspNetCore.Http;
 
 namespace Project.Helpers {
   public class FileManager {
-    public static string Save(IBrowserFile file, string root, string folder) {
-      string newFileName = Guid.NewGuid().ToString() + file.Name;
+    public static string Save(IFormFile file, string root, string folder) {
+      string newFileName = Guid.NewGuid().ToString() + file.FileName;
       string path = Path.Combine(root, folder, newFileName);
 
       using FileStream fs = new(path, FileMode.Create);
-      file.OpenReadStream().CopyTo(fs);
+      file.CopyTo(fs);
 
       return newFileName;
     }

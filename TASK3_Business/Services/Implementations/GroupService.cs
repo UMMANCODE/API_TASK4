@@ -29,31 +29,34 @@ namespace TASK3_Business.Services.Implementations {
       _context.SaveChanges();
       return entity.Id;
     }
-    public List<GroupGetAllDto> GetAll() {
-      return _context.Groups.Where(x => !x.IsDeleted).Select(x => new GroupGetAllDto {
-        Id = x.Id,
-        Name = x.Name,
-        Limit = x.Limit
-      }).ToList();
+    public List<GroupGetAllDto> GetAll(int pageNumber = 1, int pageSize = 1) {
+      if (pageNumber <= 0 || pageSize <= 0) {
+        throw new RestException();
+      }
+
+      return _context.Groups.Where(x => !x.IsDeleted)
+        .Skip((pageNumber - 1) * pageSize)
+        .Take(pageSize)
+        .Select(x => new GroupGetAllDto {
+          Id = x.Id,
+          Name = x.Name,
+          Limit = x.Limit
+        }).ToList();
     }
     public GroupGetOneDto GetById(int id) {
       var group = _context.Groups.Include(g => g.Students)
           .FirstOrDefault(x => x.Id == id);
 
-      if (group == null)
-        throw new RestException();
-
-      return new GroupGetOneDto {
-        Id = group.Id,
-        Name = group.Name,
-        Limit = group.Limit
-      };
+      return group == null
+        ? throw new RestException()
+        : new GroupGetOneDto {
+          Id = group.Id,
+          Name = group.Name,
+          Limit = group.Limit
+        };
     }
     public void Update(int id, GroupUpdateOneDto updateDto) {
-      var group = _context.Groups.FirstOrDefault(x => x.Id == id && !x.IsDeleted);
-
-      if (group == null)
-        throw new RestException();
+      var group = _context.Groups.FirstOrDefault(x => x.Id == id && !x.IsDeleted) ?? throw new RestException();
 
       if (group.Name != updateDto.Name && _context.Groups.Any(x => x.Name == updateDto.Name && !x.IsDeleted))
         throw new RestException();
@@ -67,10 +70,7 @@ namespace TASK3_Business.Services.Implementations {
 
     public void Delete(int id) {
       var group = _context.Groups.Include(g => g.Students)
-          .FirstOrDefault(x => x.Id == id);
-
-      if (group == null)
-        throw new RestException();
+        .FirstOrDefault(x => x.Id == id && !x.IsDeleted) ?? throw new RestException();
 
       group.IsDeleted = true;
       _context.Groups.Update(group);
