@@ -67,6 +67,7 @@ namespace TASK3_Business.Services.Implementations {
         .Where(x => !x.IsDeleted)
         .Skip((pageNumber - 1) * pageSize)
         .Take(pageSize)
+        .OrderBy(x => x.Id)
         .Select(x => new StudentGetAllDto {
           Id = x.Id,
           FirstName = x.FirstName,

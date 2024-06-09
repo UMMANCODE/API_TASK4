@@ -3,6 +3,7 @@ using FluentValidation.AspNetCore;
 using MicroElements.Swashbuckle.FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Serilog;
 using TASK3_Business.Exceptions;
 using TASK3_Business.Services.Implementations;
 using TASK3_Business.Services.Interfaces;
@@ -36,6 +37,12 @@ builder.Services.AddValidatorsFromAssemblyContaining<StudentCreateOneDtoValidato
 //Custom Services
 builder.Services.AddScoped<IStudentService, StudentService>();
 builder.Services.AddScoped<IGroupService, GroupService>();
+
+//Serilog
+builder.Host.UseSerilog((hostingContext, loggerConfiguration) => {
+  loggerConfiguration
+  .ReadFrom.Configuration(hostingContext.Configuration);
+});
 
 //Microelements
 builder.Services.AddFluentValidationRulesToSwagger();

@@ -37,6 +37,7 @@ namespace TASK3_Business.Services.Implementations {
       return _context.Groups.Where(x => !x.IsDeleted)
         .Skip((pageNumber - 1) * pageSize)
         .Take(pageSize)
+        .OrderBy(x => x.Id)
         .Select(x => new GroupGetAllDto {
           Id = x.Id,
           Name = x.Name,
